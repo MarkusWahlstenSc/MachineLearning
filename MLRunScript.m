@@ -1,6 +1,14 @@
-[model_names, DataSettings, parameters] = ReadJson('MLSetup.json');
+function MLRunScript(json_file_path)
+%%
+%
+%
+%%
+
+[model_names, DataSettings, parameters] = ReadJson(json_file_path);
 [TrainingData, ValidationData]       = GetData(DataSettings);
 predicted_data                       = GetPredictedData(model_names, parameters, TrainingData, ValidationData);
+
+end
 
 %%
 function [model_names, DataSettings, parameters] = ReadJson(setup_file_name)
