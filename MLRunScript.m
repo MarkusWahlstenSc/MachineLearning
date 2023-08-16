@@ -190,8 +190,33 @@ end
 %%
 function ModifiedDataSet = AddSignalDefinitions(DataSet, variable_definitions)
 
+dat_fields      = fields(DataSet);
+n_data          = length(DataSet.([dat_fields{1}]));
+n_dat_fields    = length(dat_fields);
+variable_names  = fields(variable_definitions);
+n_variable_defs = length(variable_names);
 ModifiedDataSet = DataSet;
 
+for k = 1:n_variable_defs
+    variable_name     = variable_names{k};
+    tmp_variable_defs = variable_definitions.(variable_name);
+    split_def         = split(tmp_variable_defs, ' ');
+    n_splits          = length(split_def);
+    for n = 1:n_splits
+        tmp_split = split_def(n);
+        for m = 1:n_dat_fields
+            tmp_signal = dat_fields{m};
+            if strcmp(tmp_split, tmp_signal)
+                tmp_split = ['DataSet.', tmp_signal];
+                split_def{n} = tmp_split;
+                break
+            end
+        end
+    end
+    tmp_def = join(split_def);
+    ModifiedDataSet.(variable_name) = eval(tmp_def{1});
+end
+    
 end
 
 %%
