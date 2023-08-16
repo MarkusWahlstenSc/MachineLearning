@@ -4,14 +4,14 @@ function MLRunScript(json_file_path)
 %
 %%
 
-[model_names, DataSettings, parameters] = ReadJson(json_file_path);
+[model_names, DataSettings, ModelParameters] = ReadJson(json_file_path);
 [TrainingData, ValidationData]       = GetData(DataSettings);
-predicted_data                       = GetPredictedData(model_names, parameters, TrainingData, ValidationData);
+predicted_data                       = GetPredictedData(model_names, ModelParameters, TrainingData, ValidationData);
 
 end
 
 %%
-function [model_names, DataSettings, parameters] = ReadJson(setup_file_name)
+function [model_names, DataSettings, ModelParameters] = ReadJson(setup_file_name)
 
 fname = setup_file_name;
 fid   = fopen(fname);
@@ -26,14 +26,14 @@ model_params = vals.modelParameters;
 DataSettings = vals.dataSettings;
 n_models     = length(model_names);
 n_params     = length(model_params);
-parameters   = cell(n_models, 1);
+ModelParameters   = cell(n_models, 1);
 
 for k = 1:n_models
     tmp_model_names = model_names(k);
     for m = 1:n_params
         tmp_parameter = model_params{m};
         if strcmp(tmp_parameter.model, tmp_model_names)
-            parameters{k} = tmp_parameter;
+            ModelParameters{k} = tmp_parameter;
         end
     end
 end
@@ -57,8 +57,6 @@ for k = 1:n_models
     whitespaces            = char(repmat({' '}, max_str_len - length(model_name), 1))';
     disp([model_name, ': ', whitespaces, num2str(accuracy(k) * 100), '%'])
 end
-
-
 
 end
 
@@ -199,7 +197,44 @@ end
 %%
 function FilteredDataSet = FilterDataSet(DataSet, conditions)
 
-FilteredDataSet = DataSet;
+dat_fields    = fields(DataSet);
+n_data        = length(DataSet.([dat_fields{1}]));
+n_dat_fields  = length(dat_fields);
+n_conditions  = length(conditions);
+valid_indices = true(1, n_data);
+
+for k = 1:n_conditions
+    tmp_condition   = conditions{k};
+    split_condition = split(tmp_condition, ' ');
+    n_splits        = length(split_condition);
+    for n = 1:n_splits
+        tmp_split = split_condition(n);
+        for m = 1:n_dat_fields
+            tmp_signal = dat_fields{m};
+            if strcmp(tmp_split, tmp_signal)
+                tmp_split = ['DataSet.', tmp_signal];
+                split_condition{n} = tmp_split;
+                break
+            end
+        end
+    end
+    tmp_condition = join(split_condition);
+    valid_indices = valid_indices & eval(tmp_condition{1});
+end
+
+FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices);
+
+end
+
+%%
+function FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices)
+
+dat_fields   = fields(DataSet);
+n_dat_fields = length(dat_fields);
+
+for k = 1:n_dat_fields
+    FilteredDataSet.(dat_fields{k}) = DataSet.(dat_fields{k})(valid_indices);
+end
 
 end
 

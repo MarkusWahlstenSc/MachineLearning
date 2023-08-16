@@ -34,7 +34,7 @@
             
          ],
          "conditions": [
-            
+            "x1 > x10"
          ],
          "trainingRatio": 0.9
       },
