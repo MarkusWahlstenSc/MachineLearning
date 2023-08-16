@@ -14,7 +14,7 @@
      ],
     "dataSettings":
       {
-         "dataPath":"C:\\NEFV\\Misfire\\NP2\\Development\\Machine learning\\Machine learning framework\\TestSineData.mat",
+         "dataPath":"TestSineData.mat",
          "inputs": [
             "x1",
             "x2",
