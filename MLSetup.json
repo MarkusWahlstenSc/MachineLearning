@@ -1,0 +1,80 @@
+{
+    "ApplicationType": "Classification",
+    "modelsToRun":[
+        "SVM",
+        "Logistic regression",
+        "Naive Bayes",
+        "ANN",
+        "CNN",
+        "LSTM",
+        "k-nearest",
+        "k-means",
+        "Decision tree",
+        "Random forest"
+     ],
+    "dataSettings":
+      {
+         "dataPath":"C:\\NEFV\\Misfire\\NP2\\Development\\Machine learning\\Machine learning framework\\TestSineData.mat",
+         "inputs": [
+            "x1",
+            "x2",
+            "x3",
+            "x4",
+            "x5",
+            "x6",
+            "x7",
+            "x8",
+            "x9",
+            "x10"
+         ],
+         "outputs": [
+            "y1"
+         ],
+         "variableDefinitions": [
+            
+         ],
+         "conditions": [
+            
+         ],
+         "trainingRatio": 0.9
+      },
+    "modelParameters":[
+       {
+          "model":"SVM",
+          "kernelfunction":"RBF"
+       },
+       {
+          "model":"Logistic regression"
+       },
+       {
+          "model":"Naive Bayes"
+       },
+       {
+          "model":"ANN",
+          "size":[15, 10, 5]
+       },
+       {
+          "model":"CNN",
+          "nFilters": 20,
+          "filterSize": 5
+       },
+       {
+          "model":"LSTM",
+          "nHiddenUnits": 10
+       },
+       {
+          "model":"k-nearest",
+          "nNearestNeighors": 10,
+          "distanceMetric":"euclidean"
+       },
+       {
+          "model":"k-means"
+       },
+       {
+          "model":"Decision tree"
+       },
+       {
+          "model":"Random forest"
+       }
+    ]
+ }
