@@ -1,2 +1,5 @@
 *.json
+*.mat
+
 !MLSetup.json
+!TestSineData.mat
