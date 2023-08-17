@@ -26,7 +26,7 @@ model_params = vals.modelParameters;
 DataSettings = vals.dataSettings;
 n_models     = length(model_names);
 n_params     = length(model_params);
-ModelParameters   = cell(n_models, 1);
+ModelParameters = cell(n_models, 1);
 
 for k = 1:n_models
     tmp_model_names = model_names(k);
@@ -112,25 +112,25 @@ function model = TrainModel(TrainingData, parameters, model_name)
 
 switch model_name
     case 'SVM'
-        model                  = SVMModel(TrainingData, parameters);
+        model = SVMModel(TrainingData, parameters);
     case 'Logistic regression'
-        model                  = LogisticRegressionModel(TrainingData, parameters);
+        model = LogisticRegressionModel(TrainingData, parameters);
     case 'Naive Bayes'
-        model                  = NaiveBayesModel(TrainingData, parameters);
+        model = NaiveBayesModel(TrainingData, parameters);
     case 'ANN'
-        model                  = ANNModel(TrainingData, parameters);
+        model = ANNModel(TrainingData, parameters);
     case 'CNN'
-        model                  = CNNModel(TrainingData, parameters);
+        model = CNNModel(TrainingData, parameters);
     case 'LSTM'
-        model                  = LSTMModel(TrainingData, parameters);
+        model = LSTMModel(TrainingData, parameters);
     case 'k-nearest'
-        model                  = []; % No model
+        model = []; % No model
     case 'k-means'
-        model                  = []; % No model
+        model = []; % No model
     case 'Decision tree'
-        model                  = DecisionTreeModel(TrainingData, parameters);
+        model = DecisionTreeModel(TrainingData, parameters);
     case 'Random forest'
-        model                  = RandomForestModel(TrainingData, parameters);
+        model = RandomForestModel(TrainingData, parameters);
     otherwise
         disp('Model name not recognized')
 end
@@ -161,7 +161,9 @@ DataSet = load(DataSettings.dataPath);
 
 ModifiedDataSet = AddSignalDefinitions(DataSet, DataSettings.variableDefinitions);
 
-FilteredDataSet = FilterDataSet(ModifiedDataSet, DataSettings.conditions);
+FilteredDataSet = FilterDataSet(ModifiedDataSet, DataSettings);
+
+%DestructedDataSet = RemoveStructsFromDataSet(DataSet, DataSettings);
 
 Data.inputs  = GetInputsOutputs(FilteredDataSet, DataSettings.inputs);
 Data.outputs = GetInputsOutputs(FilteredDataSet, DataSettings.outputs);
@@ -174,14 +176,20 @@ end
 function signal_data = GetInputsOutputs(DataSet, signals)
 
 n_signals   = length(signals);
-n_data      = length(DataSet.(signals{1}));
+n_data      = length(eval(['DataSet.', signals{1}]));
 signal_data = zeros(n_data, n_signals);
 
 for k = 1:n_signals
-    if isrow(DataSet.(signals{k}))
-        signal_data(:, k) = DataSet.(signals{k})';
+    if contains(signals{k}, '.')
+        tmp_data = eval(['DataSet.', signals{k}]);
     else
-        signal_data(:, k) = DataSet.(signals{k});
+        tmp_data = DataSet.(signals{k});
+    end
+
+    if isrow(tmp_data)
+        signal_data(:, k) = tmp_data';
+    else
+        signal_data(:, k) = tmp_data;
     end
 end
 
@@ -190,12 +198,16 @@ end
 %%
 function ModifiedDataSet = AddSignalDefinitions(DataSet, variable_definitions)
 
+ModifiedDataSet = DataSet;
+
+if isempty(variable_definitions)
+    return
+end
+
 dat_fields      = fields(DataSet);
-n_data          = length(DataSet.([dat_fields{1}]));
 n_dat_fields    = length(dat_fields);
 variable_names  = fields(variable_definitions);
 n_variable_defs = length(variable_names);
-ModifiedDataSet = DataSet;
 
 for k = 1:n_variable_defs
     variable_name     = variable_names{k};
@@ -204,12 +216,28 @@ for k = 1:n_variable_defs
     n_splits          = length(split_def);
     for n = 1:n_splits
         tmp_split = split_def(n);
-        for m = 1:n_dat_fields
-            tmp_signal = dat_fields{m};
-            if strcmp(tmp_split, tmp_signal)
-                tmp_split = ['DataSet.', tmp_signal];
-                split_def{n} = tmp_split;
-                break
+        if contains(tmp_split, '.')
+            split_struct    = split(tmp_split, '.');
+            n_struct_splits = length(split_struct);
+            tmp_data_set    = DataSet;
+            for p = 1:n_struct_splits
+                if isfield(tmp_data_set, split_struct{p})
+                    tmp_data_set = tmp_data_set.(split_struct{p});
+                else
+                    break
+                end
+                if p == n_struct_splits
+                    split_def{n} = ['DataSet.', tmp_split{1}];
+                end
+            end
+        else
+            for m = 1:n_dat_fields
+                tmp_signal = dat_fields{m};
+                if strcmp(tmp_split, tmp_signal)
+                    tmp_split = ['DataSet.', tmp_signal];
+                    split_def{n} = tmp_split;
+                    break
+                end
             end
         end
     end
@@ -220,16 +248,16 @@ end
 end
 
 %%
-function FilteredDataSet = FilterDataSet(DataSet, conditions)
+function FilteredDataSet = FilterDataSet(DataSet, DataSettings)
 
 dat_fields    = fields(DataSet);
-n_data        = length(DataSet.([dat_fields{1}]));
+n_data        = length(eval(['DataSet.', DataSettings.inputs{1}]));
 n_dat_fields  = length(dat_fields);
-n_conditions  = length(conditions);
+n_conditions  = length(DataSettings.conditions);
 valid_indices = true(1, n_data);
 
 for k = 1:n_conditions
-    tmp_condition   = conditions{k};
+    tmp_condition   = DataSettings.conditions{k};
     split_condition = split(tmp_condition, ' ');
     n_splits        = length(split_condition);
     for n = 1:n_splits
@@ -247,18 +275,18 @@ for k = 1:n_conditions
     valid_indices = valid_indices & eval(tmp_condition{1});
 end
 
-FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices);
+FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices, DataSettings);
 
 end
 
 %%
-function FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices)
+function FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices, DataSettings)
 
-dat_fields   = fields(DataSet);
+dat_fields   = {DataSettings.inputs{:}, DataSettings.outputs{:}};
 n_dat_fields = length(dat_fields);
 
 for k = 1:n_dat_fields
-    FilteredDataSet.(dat_fields{k}) = DataSet.(dat_fields{k})(valid_indices);
+    eval(['FilteredDataSet.', dat_fields{k}, ' = DataSet.', dat_fields{k}, '(valid_indices);']);
 end
 
 end
