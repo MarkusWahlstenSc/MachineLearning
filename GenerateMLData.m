@@ -1,4 +1,4 @@
-function [TrainingData, ValidationData] = GenerateMLData(n_samples, train_fraction, data_set, data_parameters)
+function [TrainingData, ValidationData, filtered_indices] = GenerateMLData(n_samples, train_fraction, data_set, data_parameters)
 %%
 %
 %
@@ -6,7 +6,7 @@ function [TrainingData, ValidationData] = GenerateMLData(n_samples, train_fracti
 
 
 if strcmp(data_set, 'Sine')
-    [TrainingData, ValidationData] = GenerateSineMLData(n_samples, train_fraction, data_parameters);
+    [TrainingData, ValidationData, filtered_indices] = GenerateSineMLData(n_samples, train_fraction, data_parameters);
 else
     disp('Not a valid data set')
     TrainingData   = [];
@@ -16,13 +16,15 @@ end
 end
 
 %%
-function [TrainingData, ValidationData] = GenerateSineMLData(n_samples, train_fraction, data_parameters)
+function [TrainingData, ValidationData, filtered_indices] = GenerateSineMLData(n_samples, train_fraction, data_parameters)
 
 n_train_data = round(n_samples * train_fraction); 
 n_eval_data  = n_samples - n_train_data;
 
 TrainingData   = GenerateSineData(n_train_data, data_parameters);
 ValidationData = GenerateSineData(n_eval_data,  data_parameters);
+
+filtered_indices = [];
 
 end
 

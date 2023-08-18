@@ -2,4 +2,6 @@
 *.mat
 
 !MLSetup.json
+!MLSetupPlot.json
 !TestSineData.mat
+!TestSineData_ml_result.mat

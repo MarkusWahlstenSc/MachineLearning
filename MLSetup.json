@@ -15,6 +15,7 @@
     "dataSettings":
       {
          "dataPath":"TestSineData.mat",
+         "savedataPath":"TestSineData_ml_result.mat",
          "inputs": [
             "x1",
             "x2",

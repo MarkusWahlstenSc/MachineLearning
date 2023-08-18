@@ -5,16 +5,17 @@ function MLRunScript(json_file_path)
 %%
 
 [model_names, DataSettings, ModelParameters] = ReadJson(json_file_path);
-[TrainingData, ValidationData]       = GetData(DataSettings);
-predicted_data                       = GetPredictedData(model_names, ModelParameters, TrainingData, ValidationData);
+[TrainingData, ValidationData, DataSet]      = GetData(DataSettings);
+DataSet.predicted_output                     = GetPredictedData(model_names, ModelParameters, TrainingData, ValidationData);
+
+SaveResultData(DataSet, DataSettings)
 
 end
 
 %%
-function [model_names, DataSettings, ModelParameters] = ReadJson(setup_file_name)
+function [model_names, DataSettings, ModelParameters] = ReadJson(json_file_name)
 
-fname = setup_file_name;
-fid   = fopen(fname);
+fid   = fopen(json_file_name);
 raw   = fread(fid, inf);
 str   = char(raw');
 
@@ -138,7 +139,7 @@ end
 end
 
 %%
-function [TrainingData, ValidationData] = GetData(DataSettings)
+function [TrainingData, ValidationData, ModifiedDataSet] = GetData(DataSettings)
 
 if isempty(DataSettings.dataPath)
 
@@ -147,15 +148,15 @@ if isempty(DataSettings.dataPath)
     data_set        = 'Sine';
     data_parameters = [10, 0.7; 7, 0.7];
 
-    [TrainingData, ValidationData] = GenerateMLData(n_samples, train_ratio, data_set, data_parameters);
+    [TrainingData, ValidationData, ModifiedDataSet] = GenerateMLData(n_samples, train_ratio, data_set, data_parameters);
 else
-    [TrainingData, ValidationData] = GetTrainingAndValidationData(DataSettings);
+    [TrainingData, ValidationData, ModifiedDataSet] = GetTrainingAndValidationData(DataSettings);
 end
 
 end
 
 %%
-function [TrainingData, ValidationData] = GetTrainingAndValidationData(DataSettings)
+function [TrainingData, ValidationData, ModifiedDataSet] = GetTrainingAndValidationData(DataSettings)
 
 DataSet = load(DataSettings.dataPath);
 
@@ -163,12 +164,20 @@ ModifiedDataSet = AddSignalDefinitions(DataSet, DataSettings.variableDefinitions
 
 FilteredDataSet = FilterDataSet(ModifiedDataSet, DataSettings);
 
-%DestructedDataSet = RemoveStructsFromDataSet(DataSet, DataSettings);
-
 Data.inputs  = GetInputsOutputs(FilteredDataSet, DataSettings.inputs);
 Data.outputs = GetInputsOutputs(FilteredDataSet, DataSettings.outputs);
 
 [TrainingData, ValidationData] = SplitTrainingAndValidationData(Data, DataSettings.trainingRatio);
+
+
+ModifiedDataSet.filtered_indices   = FilteredDataSet.filtered_indices;
+filtered_tmp_indices               = find(FilteredDataSet.filtered_indices == true);
+validation_indices                 = false(size(FilteredDataSet.filtered_indices));
+validation_indices(filtered_tmp_indices(ValidationData.indices)) = true;
+ModifiedDataSet.validation_indices = validation_indices;
+ModifiedDataSet.validation_input   = ValidationData.inputs;
+ModifiedDataSet.validation_output  = ValidationData.outputs;
+
 
 end
 
@@ -276,6 +285,7 @@ for k = 1:n_conditions
 end
 
 FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices, DataSettings);
+FilteredDataSet.filtered_indices = valid_indices;
 
 end
 
@@ -298,7 +308,7 @@ data_indices = 1:length(Data.inputs(:, 1));
 
 n_total_samples = size(Data.inputs, 1);
 n_verif_samples = round(n_total_samples * (1 - training_ratio));
-rand_sample_seq = randperm(n_total_samples, n_verif_samples);
+rand_sample_seq = sort(randperm(n_total_samples, n_verif_samples));
 all_indices     = 1:n_total_samples;
 
 % Validation data
@@ -309,9 +319,16 @@ ValidationData.indices = data_indices(rand_sample_seq);
 % Training data
 Data.inputs(rand_sample_seq, :) = [];
 Data.outputs(rand_sample_seq)   = [];
-all_indices(rand_sample_seq)   = [];
+all_indices(rand_sample_seq)    = [];
 TrainingData.inputs  = Data.inputs;
 TrainingData.outputs = Data.outputs;
 TrainingData.indices = data_indices(all_indices);
+
+end
+
+%%
+function SaveResultData(DataSet, DataSettings)
+
+save(DataSettings.savedataPath, '-struct', 'DataSet')
 
 end

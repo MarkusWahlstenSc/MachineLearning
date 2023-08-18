@@ -1,0 +1,56 @@
+{
+   "dataPath":"TestSineData_ml_result.mat",
+   "modelsToPlot":[
+      "SVM",
+      "Logistic regression",
+      "Naive Bayes",
+      "ANN",
+      "CNN",
+      "LSTM",
+      "k-nearest",
+      "k-means",
+      "Decision tree",
+      "Random forest"
+   ],
+    "PlotOptions":[
+      {
+         "figure": 1,
+         "subplot": [2, 1, 1],
+         "xAxis": "x1",
+         "yAxis": [
+            "predicted_output"
+         ],
+         "title": "x1 vs predicted output",
+         "xLabel": "x1",
+         "yLabel": "Predicted output",
+         "YAxisDistribution": "linear",
+         "XAxisDistribution": "linear"
+      },
+      {
+         "figure": 1,
+         "subplot": [2, 1, 2],
+         "xAxis": "x2",
+         "yAxis": [
+            "predicted_output"
+         ],
+         "title": "x2 vs predicted output",
+         "xLabel": "x2",
+         "yLabel": "Predicted output",
+         "YAxisDistribution": "linear",
+         "XAxisDistribution": "linear"
+      },
+      {
+         "figure": 2,
+         "subplot": [1, 1, 1],
+         "xAxis": "y1",
+         "yAxis": [
+            "predicted_output"
+         ],
+         "title": "y1 vs predicted output",
+         "xLabel": "y1",
+         "yLabel": "Predicted output",
+         "YAxisDistribution": "linear",
+         "XAxisDistribution": "linear"
+      }
+   ]
+ }
