@@ -169,7 +169,6 @@ Data.outputs = GetInputsOutputs(FilteredDataSet, DataSettings.outputs);
 
 [TrainingData, ValidationData] = SplitTrainingAndValidationData(Data, DataSettings.trainingRatio);
 
-
 ModifiedDataSet.filtered_indices   = FilteredDataSet.filtered_indices;
 filtered_tmp_indices               = find(FilteredDataSet.filtered_indices == true);
 validation_indices                 = false(size(FilteredDataSet.filtered_indices));
@@ -271,17 +270,37 @@ for k = 1:n_conditions
     n_splits        = length(split_condition);
     for n = 1:n_splits
         tmp_split = split_condition(n);
-        for m = 1:n_dat_fields
-            tmp_signal = dat_fields{m};
-            if strcmp(tmp_split, tmp_signal)
-                tmp_split = ['DataSet.', tmp_signal];
-                split_condition{n} = tmp_split;
-                break
+        if contains(tmp_split, '.')
+            split_struct    = split(tmp_split, '.');
+            n_struct_splits = length(split_struct);
+            tmp_data_set    = DataSet;
+            for p = 1:n_struct_splits
+                if isfield(tmp_data_set, split_struct{p})
+                    tmp_data_set = tmp_data_set.(split_struct{p});
+                else
+                    break
+                end
+                if p == n_struct_splits
+                    split_condition{n} = ['DataSet.', tmp_split{1}];
+                end
+            end
+        else
+            for m = 1:n_dat_fields
+                tmp_signal = dat_fields{m};
+                if strcmp(tmp_split, tmp_signal)
+                    tmp_split = ['DataSet.', tmp_signal];
+                    split_condition{n} = tmp_split;
+                    break
+                end
             end
         end
     end
     tmp_condition = join(split_condition);
-    valid_indices = valid_indices & eval(tmp_condition{1});
+    if isrow(eval(tmp_condition{1}))
+        valid_indices = valid_indices & eval(tmp_condition{1});
+    else
+        valid_indices = valid_indices & eval(tmp_condition{1})';
+    end
 end
 
 FilteredDataSet = FilterDataSetCondition(DataSet, valid_indices, DataSettings);

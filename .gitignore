@@ -1,5 +1,6 @@
 *.json
 *.mat
+*.asv
 
 !MLSetup.json
 !MLSetupPlot.json

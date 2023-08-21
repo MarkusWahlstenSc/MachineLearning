@@ -129,9 +129,9 @@ for k = 1:n_plots
         plot(xlabel_data, ylabel_data, '*')
     end
     hold off
-    title(replace(tmp_plot_option.title, '_', '\_'))
-    xlabel(replace(tmp_plot_option.xLabel, '_', '\_'))
-    ylabel(replace(tmp_plot_option.yLabel, '_', '\_'))
+    title(tmp_plot_option.title)
+    xlabel(tmp_plot_option.xLabel)
+    ylabel(tmp_plot_option.yLabel)
 end
 
 end
