@@ -34,7 +34,7 @@ n_fields = length(PlotOptions);
 variables_used = [];
 
 for k = 1:n_fields
-    tmp_plot_options = PlotOptions(k);
+    tmp_plot_options = PlotOptions{k};
 
     % Add xAxis variables
     if ~any(strcmp(variables_used, tmp_plot_options.xAxis))
@@ -107,28 +107,43 @@ function PlotData(MLDataSet, PlotOptions)
 n_plots = numel(PlotOptions);
 
 for k = 1:n_plots
-    tmp_plot_option = PlotOptions(k);
+    tmp_plot_option = PlotOptions{k};
     fig = figure(tmp_plot_option.figure);
     subplot(tmp_plot_option.subplot(1), tmp_plot_option.subplot(2), tmp_plot_option.subplot(3))
 
-    yAxis = tmp_plot_option.yAxis;
-    nAxis = numel(yAxis);
-    dbstop at 78
-    if contains(tmp_plot_option.xAxis, '.')
-        xlabel_data = eval(['MLDataSet.', tmp_plot_option.xAxis]);
-    else
-        xlabel_data = MLDataSet.(tmp_plot_option.xAxis);
-    end
-    hold on
-    for n = 1:nAxis
-        if contains(yAxis{n}, '.')
-            ylabel_data = eval(['MLDataSet.', yAxis{n}, '(:, 1)''']);
+    if strcmp(tmp_plot_option.plotType, 'plot')
+        yAxis = tmp_plot_option.yAxis;
+        nAxis = numel(yAxis);
+
+        if contains(tmp_plot_option.xAxis, '.')
+            xlabel_data = eval(['MLDataSet.', tmp_plot_option.xAxis]);
         else
-            ylabel_data = MLDataSet.(yAxis{n})(:, 1)';
+            xlabel_data = MLDataSet.(tmp_plot_option.xAxis);
         end
-        plot(xlabel_data, ylabel_data, '*')
+        hold on
+        for n = 1:nAxis
+            if contains(yAxis{n}, '.')
+                ylabel_data = eval(['MLDataSet.', yAxis{n}, '(:, 1)''']);
+            else
+                ylabel_data = MLDataSet.(yAxis{n})(:, 1)';
+            end
+            plot(xlabel_data, ylabel_data, '*')
+        end
+        hold off
+    elseif strcmp(tmp_plot_option.plotType, 'histogram')
+        if contains(tmp_plot_option.xAxis, '.')
+            xlabel_data = eval(['MLDataSet.', tmp_plot_option.xAxis]);
+        else
+            xlabel_data = MLDataSet.(tmp_plot_option.xAxis);
+        end
+        hold on
+        histogram(xlabel_data, 'BinLimits', tmp_plot_option.edges, 'NumBins', tmp_plot_option.nBins)
+        hold off
+    else
+        disp('Plot type not recognized')
     end
-    hold off
+
+
     title(replace(tmp_plot_option.title, '_', '\_'))
     xlabel(replace(tmp_plot_option.xLabel, '_', '\_'))
     ylabel(replace(tmp_plot_option.yLabel, '_', '\_'))

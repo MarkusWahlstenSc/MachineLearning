@@ -16,6 +16,7 @@
       {
          "figure": 1,
          "subplot": [2, 1, 1],
+         "plotType": "plot",
          "xAxis": "x1",
          "yAxis": [
             "predicted_output"
@@ -29,6 +30,7 @@
       {
          "figure": 1,
          "subplot": [2, 1, 2],
+         "plotType": "plot",
          "xAxis": "x2",
          "yAxis": [
             "predicted_output"
@@ -41,7 +43,8 @@
       },
       {
          "figure": 2,
-         "subplot": [1, 1, 1],
+         "subplot": [1, 2, 1],
+         "plotType": "plot",
          "xAxis": "y1",
          "yAxis": [
             "predicted_output"
@@ -49,6 +52,20 @@
          "title": "y1 vs predicted output",
          "xLabel": "y1",
          "yLabel": "Predicted output",
+         "YAxisDistribution": "linear",
+         "XAxisDistribution": "linear"
+      },
+      {
+         "figure": 2,
+         "subplot": [1, 2, 2],
+         "plotType": "histogram",
+         "edges": [-0.5, 0.5],
+         "nBins": 20,
+         "xAxis": "x1",
+         "yAxis": null,
+         "title": "x1 histogram",
+         "xLabel": "x1",
+         "yLabel": "Frequency",
          "YAxisDistribution": "linear",
          "XAxisDistribution": "linear"
       }
