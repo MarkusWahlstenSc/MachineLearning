@@ -19,7 +19,8 @@
          "plotType": "plot",
          "xAxis": "x1",
          "yAxis": [
-            "predicted_output"
+            "predicted_output",
+            "validation_output"
          ],
          "title": "x1 vs predicted output",
          "xLabel": "x1",
@@ -33,7 +34,8 @@
          "plotType": "plot",
          "xAxis": "x2",
          "yAxis": [
-            "predicted_output"
+            "predicted_output",
+            "validation_output"
          ],
          "title": "x2 vs predicted output",
          "xLabel": "x2",
@@ -59,13 +61,32 @@
          "figure": 2,
          "subplot": [1, 2, 2],
          "plotType": "histogram",
-         "edges": [-0.5, 0.5],
-         "nBins": 20,
+         "edges": [-0.1, 0.2],
+         "nBins": 10,
          "xAxis": "x1",
          "yAxis": null,
          "title": "x1 histogram",
          "xLabel": "x1",
          "yLabel": "Frequency",
+         "YAxisDistribution": "linear",
+         "XAxisDistribution": "linear"
+      },
+      {
+         "figure": 3,
+         "subplot": [1, 1, 1],
+         "plotType": "plot bin",
+         "edges": [-0.1, 0.2],
+         "nBins": 10,
+         "xAxis": "x1",
+         "yAxis": [
+            "predicted_accuracy",
+            "predicted_accuracy_0",
+            "predicted_accuracy_1"
+            ],
+         "yLimit": [0.0, 1],
+         "title": "Accuracy vs x1",
+         "xLabel": "x1",
+         "yLabel": "Accuracy",
          "YAxisDistribution": "linear",
          "XAxisDistribution": "linear"
       }

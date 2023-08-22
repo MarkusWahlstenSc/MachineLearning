@@ -177,7 +177,6 @@ ModifiedDataSet.validation_indices = validation_indices;
 ModifiedDataSet.validation_input   = ValidationData.inputs;
 ModifiedDataSet.validation_output  = ValidationData.outputs;
 
-
 end
 
 %%
